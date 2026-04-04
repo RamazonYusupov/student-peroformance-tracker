@@ -5,8 +5,8 @@ import { api } from "../api";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("teacher");
-  const [password, setPassword] = useState("teacher123");
+  const [username, setUsername] = useState("sanjar");
+  const [password, setPassword] = useState("sanjar12345");
   const [error, setError] = useState("");
 
   const onSubmit = async (event: FormEvent) => {
@@ -26,6 +26,9 @@ export default function LoginPage() {
       <form className="card login-card" onSubmit={onSubmit}>
         <h1>Student Performance Tracker</h1>
         <p>Teacher sign-in for dashboard management</p>
+        <p className="muted-text" style={{ marginTop: 0 }}>
+          Use the local teacher account configured in backend/.env.
+        </p>
         <label>
           Username
           <input value={username} onChange={(e) => setUsername(e.target.value)} />

@@ -45,9 +45,11 @@ This creates a local SQLite database file at `backend\student_tracker.db`.
 API docs:
 - http://localhost:8000/docs
 
-Default teacher credentials:
-- username: teacher
-- password: teacher123
+Default teacher credentials for this workspace:
+- username: sanjar
+- password: sanjar12345
+
+If you replace backend/.env with your own values, use those credentials on the login page instead.
 
 ## 2) Frontend Setup
 In a new terminal:
