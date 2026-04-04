@@ -43,9 +43,21 @@ def _assigned_group_ids(test: Test) -> list[str]:
     return group_ids
 
 
+def _eligible_groups_for_test(test: Test, db: Session) -> tuple[list[Group], bool]:
+    assigned_group_ids = _assigned_group_ids(test)
+    if assigned_group_ids:
+        groups = db.scalars(select(Group).where(
+            Group.id.in_(assigned_group_ids))).all()
+        return groups, True
+
+    # "Created for everyone" means all groups in the system, not anonymous users.
+    groups = db.scalars(select(Group)).all()
+    return groups, False
+
+
 def _is_group_member(assigned_groups: list[Group], student_name: str, student_id: str) -> bool:
     if not assigned_groups:
-        return True
+        return False
 
     normalized_name = _normalize_text(student_name)
     normalized_id = _normalize_text(student_id)
@@ -81,18 +93,22 @@ def get_test_entry(test_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Test not found")
 
     assigned_group_ids = _assigned_group_ids(test)
-    assigned_groups = db.scalars(select(Group).where(Group.id.in_(
-        assigned_group_ids))).all() if assigned_group_ids else []
+    assigned_groups, has_explicit_assignments = _eligible_groups_for_test(
+        test, db)
     assigned_group_names = [group.name for group in assigned_groups]
 
     is_allowed, message = build_time_gate_message(test)
-    if assigned_group_ids and not assigned_groups:
+    if has_explicit_assignments and assigned_group_ids and not assigned_groups:
         is_allowed = False
         message = "This test has invalid or missing group assignments. Please contact your teacher."
+    elif not has_explicit_assignments and not assigned_groups:
+        is_allowed = False
+        message = "No groups are configured yet. Ask your teacher to create groups and add students first."
+
     restriction_suffix = (
         f" Only students in these groups can start this test: {', '.join(assigned_group_names)}."
-        if assigned_group_names
-        else ""
+        if has_explicit_assignments and assigned_group_names
+        else " Only students listed in a group roster can start this test."
     )
     return StudentEntryResponse(
         test_id=test.id,
@@ -122,14 +138,20 @@ def start_test(
         raise HTTPException(status_code=404, detail="Test not found")
 
     assigned_group_ids = _assigned_group_ids(test)
-    assigned_groups = db.scalars(select(Group).where(Group.id.in_(
-        assigned_group_ids))).all() if assigned_group_ids else []
+    assigned_groups, has_explicit_assignments = _eligible_groups_for_test(
+        test, db)
     assigned_group_names = [group.name for group in assigned_groups]
 
-    if assigned_group_ids and not assigned_groups:
+    if has_explicit_assignments and assigned_group_ids and not assigned_groups:
         raise HTTPException(
             status_code=400,
             detail="This test has invalid or missing group assignments. Please contact your teacher.",
+        )
+
+    if not has_explicit_assignments and not assigned_groups:
+        raise HTTPException(
+            status_code=400,
+            detail="No groups are configured yet. Ask your teacher to create groups and add students first.",
         )
 
     is_allowed, message = build_time_gate_message(test)
@@ -148,14 +170,18 @@ def start_test(
         )
 
     if not _is_group_member(assigned_groups, incoming_name, incoming_student_id):
-        raise HTTPException(
-            status_code=403,
-            detail=(
+        if has_explicit_assignments:
+            detail = (
                 "This test is restricted to assigned group students. "
                 f"Allowed groups: {', '.join(assigned_group_names)}. "
                 "Enter the exact full name and student ID from the assigned group roster."
-            ),
-        )
+            )
+        else:
+            detail = (
+                "This test is open to all groups, but only registered students can start. "
+                "Enter the exact full name and student ID from any group roster."
+            )
+        raise HTTPException(status_code=403, detail=detail)
 
     if test.subject:
         subject_submissions = db.scalars(
