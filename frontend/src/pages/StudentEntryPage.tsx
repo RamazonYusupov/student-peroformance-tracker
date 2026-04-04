@@ -53,14 +53,27 @@ export default function StudentEntryPage() {
         <h1>{entry.title}</h1>
         <p>{entry.description || "No description provided."}</p>
         {assignedGroups.length > 0 && (
-          <p><strong>Assigned Groups:</strong> {assignedGroups.join(", ")}</p>
+          <>
+            <p><strong>Assigned Groups:</strong> {assignedGroups.join(", ")}</p>
+            <p className="muted-text" style={{ marginTop: 0 }}>
+              Use the exact full name and student ID from the assigned group roster.
+            </p>
+          </>
         )}
         {!entry.is_access_allowed ? (
           <div className="error">{entry.message}</div>
         ) : (
           <form onSubmit={onStart} className="stack">
             <label>Full Name<input value={fullName} onChange={(e) => setFullName(e.target.value)} required /></label>
-            <label>Student ID (Optional)<input value={studentId} onChange={(e) => setStudentId(e.target.value)} /></label>
+            <label>
+              Student ID
+              <input
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value)}
+                required
+                placeholder="Required"
+              />
+            </label>
             {error && <div className="error">{error}</div>}
             <button type="submit">Start Test</button>
           </form>

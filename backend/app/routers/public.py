@@ -28,7 +28,7 @@ router = APIRouter(prefix="/api/public/tests", tags=["student"])
 def _normalize_text(value: str | None) -> str:
     if not value:
         return ""
-    return " ".join(value.strip().lower().split())
+    return " ".join(value.strip().split())
 
 
 def _assigned_group_ids(test: Test) -> list[str]:
@@ -43,55 +43,31 @@ def _assigned_group_ids(test: Test) -> list[str]:
     return group_ids
 
 
-def _is_group_member(assigned_groups: list[Group], student_name: str, student_id: str | None) -> bool:
+def _is_group_member(assigned_groups: list[Group], student_name: str, student_id: str) -> bool:
     if not assigned_groups:
         return True
 
     normalized_name = _normalize_text(student_name)
     normalized_id = _normalize_text(student_id)
 
-    allowed_names: set[str] = set()
-    allowed_ids: set[str] = set()
+    if not normalized_name or not normalized_id:
+        return False
+
     for group in assigned_groups:
         for entry in (group.students or []):
             if isinstance(entry, dict):
                 full_name = _normalize_text(entry.get("full_name"))
                 student_id_value = _normalize_text(entry.get("student_id"))
-                if full_name:
-                    allowed_names.add(full_name)
-                if student_id_value:
-                    allowed_ids.add(student_id_value)
+                if full_name and student_id_value:
+                    if normalized_name == full_name and normalized_id == student_id_value:
+                        return True
             elif isinstance(entry, str):
                 # Backward compatibility for existing string-based group entries.
                 value = _normalize_text(entry)
-                if value:
-                    allowed_names.add(value)
-                    allowed_ids.add(value)
+                if value and normalized_name == value and normalized_id == value:
+                    return True
 
-    if not allowed_names and not allowed_ids:
-        return False
-
-    return normalized_name in allowed_names or (normalized_id and normalized_id in allowed_ids)
-
-
-def _get_identity_match_reason(
-    existing_name: str | None,
-    existing_student_id: str | None,
-    incoming_name: str,
-    incoming_student_id: str | None,
-) -> str | None:
-    normalized_existing_name = _normalize_text(existing_name)
-    normalized_incoming_name = _normalize_text(incoming_name)
-    normalized_existing_id = _normalize_text(existing_student_id)
-    normalized_incoming_id = _normalize_text(incoming_student_id)
-
-    if normalized_existing_id and normalized_incoming_id and normalized_existing_id == normalized_incoming_id:
-        return "student_id"
-
-    if normalized_existing_name and normalized_incoming_name and normalized_existing_name == normalized_incoming_name:
-        return "name"
-
-    return None
+    return False
 
 
 @router.get("/{test_id}/entry", response_model=StudentEntryResponse)
@@ -161,7 +137,15 @@ def start_test(
         raise HTTPException(status_code=400, detail=message)
 
     incoming_name = payload.full_name.strip()
-    incoming_student_id = payload.student_id.strip() if payload.student_id else None
+    incoming_student_id = payload.student_id.strip()
+    normalized_name = _normalize_text(incoming_name)
+    normalized_id = _normalize_text(incoming_student_id)
+
+    if not normalized_name or not normalized_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Full name and student ID are required.",
+        )
 
     if not _is_group_member(assigned_groups, incoming_name, incoming_student_id):
         raise HTTPException(
@@ -169,7 +153,7 @@ def start_test(
             detail=(
                 "This test is restricted to assigned group students. "
                 f"Allowed groups: {', '.join(assigned_group_names)}. "
-                "Your name or student ID is not in the assigned group lists."
+                "Enter the exact full name and student ID from the assigned group roster."
             ),
         )
 
@@ -184,24 +168,22 @@ def start_test(
         ).all()
 
         duplicate_submission = None
-        matched_by = None
         for sub in subject_submissions:
-            reason = _get_identity_match_reason(
-                existing_name=sub.student_name,
-                existing_student_id=sub.student_id,
-                incoming_name=incoming_name,
-                incoming_student_id=incoming_student_id,
-            )
-            if reason:
+            existing_student_id = _normalize_text(sub.student_id)
+            existing_name = _normalize_text(sub.student_name)
+
+            if existing_student_id and existing_student_id == normalized_id:
                 duplicate_submission = sub
-                matched_by = reason
+                break
+            if not existing_student_id and existing_name and existing_name == normalized_name:
+                duplicate_submission = sub
                 break
 
-        if duplicate_submission and matched_by:
+        if duplicate_submission:
             raise HTTPException(
                 status_code=400,
                 detail=(
-                    "You have already submitted this test first."
+                    "You have already submitted a test in this subject. Retakes are not allowed."
                 ),
             )
 

@@ -7,7 +7,6 @@ import GroupsPage from "./pages/GroupsPage";
 import LoginPage from "./pages/LoginPage";
 import ResultsPage from "./pages/ResultsPage";
 import StudentEntryPage from "./pages/StudentEntryPage";
-import StudentProfilePage from "./pages/StudentProfilePage";
 import StudentTestPage from "./pages/StudentTestPage";
 import TestsPage from "./pages/TestsPage";
 
@@ -17,7 +16,6 @@ function Shell({ children }: { children: ReactNode }) {
     { to: "/", label: "Dashboard" },
     { to: "/tests", label: "Tests" },
     { to: "/groups", label: "Groups" },
-    { to: "/students", label: "Students" },
   ];
 
   return (
@@ -101,17 +99,6 @@ export default function App() {
           <ProtectedRoute>
             <Shell>
               <ResultsPage />
-            </Shell>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/students"
-        element={
-          <ProtectedRoute>
-            <Shell>
-              <StudentProfilePage />
             </Shell>
           </ProtectedRoute>
         }

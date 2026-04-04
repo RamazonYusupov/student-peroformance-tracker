@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db import Base, engine
 from app.models import Group
-from app.routers import analytics, auth, dashboard, groups, public, students, submissions, tests
+from app.routers import analytics, auth, dashboard, groups, public, submissions, tests
 
 app = FastAPI(title="Student Performance Tracker API", version="1.0.0")
 
@@ -103,5 +103,4 @@ app.include_router(tests.router)
 app.include_router(public.router)
 app.include_router(submissions.router)
 app.include_router(analytics.router)
-app.include_router(students.router)
 app.include_router(groups.router)

@@ -127,6 +127,61 @@ table {
   background: #fff;
 }
 
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 14px;
+}
+
+.table-wrap table {
+  min-width: 680px;
+}
+
+.chart-block {
+  margin-top: 8px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: capitalize;
+  padding: 4px 9px;
+  line-height: 1;
+}
+
+.status-pill.pass {
+  color: #165e34;
+  background: #d6f4dd;
+}
+
+.status-pill.fail {
+  color: #7a1d2b;
+  background: #f8d8de;
+}
+
+.status-pill.pending {
+  color: #7b4a14;
+  background: #fbe6c7;
+}
+
+.status-pill.active {
+  color: #0d4f4c;
+  background: #d7efef;
+}
+
+.status-pill.closed {
+  color: #4e5661;
+  background: #e7eaef;
+}
+
+.danger-btn {
+  background: linear-gradient(140deg, #b11a31, #8f1328);
+}
+
 th,
 td {
   text-align: left;
@@ -229,6 +284,16 @@ tbody tr:nth-child(2n) {
   width: 100%;
 }
 
+.page-header {
+  margin-bottom: 14px;
+}
+
+.page-subtitle {
+  margin: -4px 0 0;
+  color: #4f5d45;
+  font-size: 14px;
+}
+
 .card {
   background: var(--card);
   backdrop-filter: blur(10px);
@@ -238,6 +303,27 @@ tbody tr:nth-child(2n) {
   box-shadow: var(--shadow-soft);
   margin-bottom: 18px;
   animation: card-rise 0.35s ease;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-chip {
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  background: #e6f3ed;
+  color: #1a5f4b;
+  box-shadow: none;
+}
+
+.toggle-chip:hover {
+  transform: none;
+  filter: brightness(1.01);
 }
 
 .stat-grid {
@@ -758,6 +844,11 @@ tbody tr:nth-child(2n) {
   .mc-options-grid {
     grid-template-columns: 1fr;
   }
+
+  .section-header {
+    align-items: start;
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 600px) {
@@ -768,5 +859,9 @@ tbody tr:nth-child(2n) {
   .chart-controls {
     display: grid;
     gap: 10px;
+  }
+
+  .table-wrap table {
+    min-width: 560px;
   }
 }

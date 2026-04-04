@@ -39,8 +39,8 @@ class QuestionRead(QuestionBase):
 
 
 class GroupStudent(BaseModel):
-    full_name: str
-    student_id: str
+    full_name: str = Field(min_length=1)
+    student_id: str = Field(min_length=1)
 
 
 class GroupBase(BaseModel):
@@ -123,8 +123,8 @@ class DashboardGroupTrendResponse(BaseModel):
 
 
 class StudentStartRequest(BaseModel):
-    full_name: str
-    student_id: str | None = None
+    full_name: str = Field(min_length=1)
+    student_id: str = Field(min_length=1)
 
 
 class StudentEntryResponse(BaseModel):
