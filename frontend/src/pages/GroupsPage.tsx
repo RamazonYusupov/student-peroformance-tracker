@@ -3,11 +3,14 @@ import {
   CartesianGrid,
   Line,
   LineChart,
+  Legend,
   ResponsiveContainer,
   Tooltip,
+  TooltipProps,
   XAxis,
   YAxis,
 } from "recharts";
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 import { api } from "../api";
 import { GroupEntity, GroupStudent, GroupStudentProfile } from "../types";
@@ -45,6 +48,30 @@ function hasDuplicateStudents(students: GroupStudent[]) {
   return false;
 }
 
+function formatSubject(subject: string | null | undefined) {
+  return normalizeText(subject || "") || "Uncategorized";
+}
+
+function SubjectTooltip({ active, payload, label }: TooltipProps<ValueType, NameType>) {
+  if (!active || !payload || !payload.length) return null;
+
+  const visibleRows = payload.filter((entry) => typeof entry.value === "number");
+  if (!visibleRows.length) return null;
+
+  return (
+    <div className="chart-tooltip-panel">
+      <p className="chart-tooltip-title">{label}</p>
+      {visibleRows.map((entry) => (
+        <div key={String(entry.name)} className="chart-tooltip-row">
+          <span className="chart-tooltip-dot" style={{ background: entry.color || "#0f8b8d" }} />
+          <span>{entry.name}</span>
+          <strong>{Number(entry.value).toFixed(2)}%</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function GroupsPage() {
   const [groups, setGroups] = useState<GroupEntity[]>([]);
   const [groupName, setGroupName] = useState("");
@@ -57,6 +84,7 @@ export default function GroupsPage() {
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<SelectedStudentState | null>(null);
   const [selectedStudentProfile, setSelectedStudentProfile] = useState<GroupStudentProfile | null>(null);
+  const [selectedStudentSubject, setSelectedStudentSubject] = useState("");
   const [selectedStudentLoading, setSelectedStudentLoading] = useState(false);
   const [selectedStudentError, setSelectedStudentError] = useState("");
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -92,16 +120,59 @@ export default function GroupsPage() {
     loadGroups();
   }, []);
 
-  const studentTrendData = useMemo(() => {
-    if (!selectedStudentProfile) return [] as Array<Record<string, string | number>>;
-    return selectedStudentProfile.history
-      .filter((row) => row.submitted_at)
-      .map((row) => ({
-        date: new Date(row.submitted_at as string).toLocaleDateString(),
-        percentage: row.percentage,
-        test_title: row.test_title,
-      }));
+  const availableSubjects = useMemo(() => {
+    if (!selectedStudentProfile) return [] as string[];
+
+    const fallbackSubjects = Array.from(
+      new Set(selectedStudentProfile.history.map((row) => formatSubject(row.subject))),
+    ).sort((a, b) => a.localeCompare(b));
+
+    return (selectedStudentProfile.subjects || []).length
+      ? [...selectedStudentProfile.subjects].sort((a, b) => a.localeCompare(b))
+      : fallbackSubjects;
   }, [selectedStudentProfile]);
+
+  const selectedSubjectTrendData = useMemo(() => {
+    if (!selectedStudentProfile || !selectedStudentSubject) return [] as Array<Record<string, string | number>>;
+
+    const bucketByDate = new Map<string, { total: number; count: number }>();
+    selectedStudentProfile.history.forEach((row) => {
+      if (!row.submitted_at) return;
+      if (formatSubject(row.subject) !== selectedStudentSubject) return;
+
+      const dateKey = new Date(row.submitted_at).toISOString().slice(0, 10);
+      const current = bucketByDate.get(dateKey) || { total: 0, count: 0 };
+      current.total += row.percentage;
+      current.count += 1;
+      bucketByDate.set(dateKey, current);
+    });
+
+    return Array.from(bucketByDate.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([dateKey, value]) => ({
+        date: new Date(dateKey).toLocaleDateString(),
+        percentage: Number((value.total / value.count).toFixed(2)),
+      }));
+  }, [selectedStudentProfile, selectedStudentSubject]);
+
+  const selectedSubjectHistory = useMemo(() => {
+    if (!selectedStudentProfile) return [];
+    if (!selectedStudentSubject) return selectedStudentProfile.history;
+    return selectedStudentProfile.history.filter(
+      (row) => formatSubject(row.subject) === selectedStudentSubject,
+    );
+  }, [selectedStudentProfile, selectedStudentSubject]);
+
+  useEffect(() => {
+    if (!availableSubjects.length) {
+      setSelectedStudentSubject("");
+      return;
+    }
+
+    if (!selectedStudentSubject || !availableSubjects.includes(selectedStudentSubject)) {
+      setSelectedStudentSubject(availableSubjects[0]);
+    }
+  }, [availableSubjects, selectedStudentSubject]);
 
   const addStudentToDraft = () => {
     const fullName = normalizeText(studentFullName);
@@ -194,6 +265,7 @@ export default function GroupsPage() {
     });
     setSelectedStudentLoading(true);
     setSelectedStudentError("");
+    setSelectedStudentSubject("");
     try {
       const profile = (await api.getGroupStudentProfile(group.id, student.student_id)) as GroupStudentProfile;
       setSelectedStudentProfile(profile);
@@ -562,35 +634,51 @@ export default function GroupsPage() {
                                           </div>
 
                                           <div className="card student-chart-card">
-                                            <h3>Results Over Time</h3>
-                                            {studentTrendData.length ? (
+                                            <h3>Results Over Time by Subject</h3>
+                                            <div className="subject-filter-row">
+                                              <label>
+                                                Subject
+                                                <select
+                                                  value={selectedStudentSubject}
+                                                  onChange={(event) => setSelectedStudentSubject(event.target.value)}
+                                                >
+                                                  {availableSubjects.map((subject) => (
+                                                    <option key={subject} value={subject}>
+                                                      {subject}
+                                                    </option>
+                                                  ))}
+                                                </select>
+                                              </label>
+                                            </div>
+                                            {selectedSubjectTrendData.length ? (
                                               <div className="chart-block student-chart-block">
                                                 <ResponsiveContainer>
-                                                  <LineChart data={studentTrendData}>
-                                                    <CartesianGrid strokeDasharray="3 3" />
+                                                  <LineChart data={selectedSubjectTrendData} margin={{ left: 8, right: 18, top: 10, bottom: 4 }}>
+                                                    <CartesianGrid strokeDasharray="3 3" stroke="#e4ecda" />
                                                     <XAxis dataKey="date" />
                                                     <YAxis domain={[0, 100]} />
-                                                    <Tooltip />
+                                                    <Tooltip content={<SubjectTooltip />} />
+                                                    <Legend />
                                                     <Line
                                                       type="monotone"
                                                       dataKey="percentage"
                                                       stroke="#0f8b8d"
                                                       strokeWidth={3}
                                                       dot={{ r: 4 }}
-                                                      name="Percentage"
+                                                      name={selectedStudentSubject || "Percentage"}
                                                     />
                                                   </LineChart>
                                                 </ResponsiveContainer>
                                               </div>
                                             ) : (
-                                              <p className="muted-text" style={{ margin: 0 }}>No dated results available yet.</p>
+                                              <p className="muted-text" style={{ margin: 0 }}>No dated results available for this subject yet.</p>
                                             )}
                                           </div>
                                         </div>
 
                                         <div className="card">
                                           <h3>Recent Results</h3>
-                                          {groupSelectedProfile.history.length ? (
+                                          {selectedSubjectHistory.length ? (
                                             <div className="table-wrap">
                                               <table className="student-history-table">
                                                 <thead>
@@ -603,7 +691,7 @@ export default function GroupsPage() {
                                                   </tr>
                                                 </thead>
                                                 <tbody>
-                                                  {[...groupSelectedProfile.history]
+                                                  {[...selectedSubjectHistory]
                                                     .slice()
                                                     .reverse()
                                                     .slice(0, 5)
