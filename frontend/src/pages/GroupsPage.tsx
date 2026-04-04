@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Fragment, useEffect, useState } from "react";
 
 import { api } from "../api";
 import { GroupEntity, GroupStudent } from "../types";
@@ -34,6 +34,7 @@ export default function GroupsPage() {
   const [groupEdits, setGroupEdits] = useState<Record<string, GroupEditState>>({});
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState("");
+  const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [savingGroupId, setSavingGroupId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -133,6 +134,9 @@ export default function GroupsPage() {
       await api.deleteGroup(groupId);
       if (selectedGroupId === groupId) {
         setSelectedGroupId("");
+      }
+      if (expandedGroupId === groupId) {
+        setExpandedGroupId(null);
       }
       setDeleteConfirmText("");
       loadGroups();
@@ -364,7 +368,7 @@ export default function GroupsPage() {
         {!groups.length ? (
           <p className="muted-text">No groups found.</p>
         ) : (
-          <table>
+          <table className="groups-table">
             <thead>
               <tr>
                 <th>Group Name</th>
@@ -372,12 +376,57 @@ export default function GroupsPage() {
               </tr>
             </thead>
             <tbody>
-              {groups.map((group) => (
-                <tr key={group.id}>
-                  <td>{group.name}</td>
-                  <td>{(group.students || []).length}</td>
-                </tr>
-              ))}
+              {groups.map((group) => {
+                const isExpanded = expandedGroupId === group.id;
+                const students = group.students || [];
+
+                return (
+                  <Fragment key={group.id}>
+                    <tr className={`group-row ${isExpanded ? "expanded" : ""}`}>
+                      <td>
+                        <button
+                          className="group-name-button"
+                          type="button"
+                          onClick={() =>
+                            setExpandedGroupId((prev) => (prev === group.id ? null : group.id))
+                          }
+                          aria-expanded={isExpanded}
+                        >
+                          <span className="expand-indicator" aria-hidden="true">
+                            {isExpanded ? "▾" : "▸"}
+                          </span>
+                          {group.name}
+                        </button>
+                      </td>
+                      <td>
+                        <span className="student-count-badge">{students.length}</span>
+                      </td>
+                    </tr>
+                    {isExpanded && (
+                      <tr className="group-students-row">
+                        <td colSpan={2}>
+                          <div className="group-students-panel">
+                            {students.length ? (
+                              <ul className="group-students-list">
+                                {students.map((student) => (
+                                  <li key={`${group.id}-${student.student_id}`} className="group-student-item">
+                                    <span className="group-student-name">{student.full_name}</span>
+                                    <span className="group-student-id">{student.student_id}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="muted-text" style={{ margin: 0 }}>
+                                No students in this group.
+                              </p>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
         )}
