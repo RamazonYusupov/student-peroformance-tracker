@@ -134,7 +134,10 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1>Dashboard</h1>
+      <div className="page-header">
+        <h1>Dashboard</h1>
+        <p className="page-subtitle">Track performance, review pending responses, and monitor trends.</p>
+      </div>
       <div className="stat-grid">
         <div className="card stat"><h3>Total Tests</h3><span>{summary.total_tests}</span></div>
         <div className="card stat"><h3>Active Tests</h3><span>{summary.active_tests}</span></div>
@@ -188,11 +191,11 @@ export default function DashboardPage() {
       </div>
 
       <div className="card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="section-header">
           <h2>Pending Grading</h2>
           <button
             onClick={() => setExpandedPending(!expandedPending)}
-            style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
+            className="toggle-chip"
           >
             {expandedPending ? "▼ Hide" : "▶ Show"}
           </button>
@@ -202,82 +205,88 @@ export default function DashboardPage() {
             {summary.recent_activity.filter((item) => item.status === "pending").length === 0 ? (
               <p className="muted-text">No pending submissions to grade.</p>
             ) : (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Student</th>
-                    <th>Score</th>
-                    <th>Submitted</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {summary.recent_activity
-                    .filter((item) => item.status === "pending")
-                    .map((item) => (
-                      <tr key={item.submission_id}>
-                        <td>{item.student_name}</td>
-                        <td>
-                          {item.score} / {item.total_points}
-                        </td>
-                        <td>{item.submitted_at ? new Date(item.submitted_at).toLocaleString() : "-"}</td>
-                        <td>
-                          <button onClick={() => openPendingReview(item.submission_id)}>
-                            Review
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Score</th>
+                      <th>Submitted</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {summary.recent_activity
+                      .filter((item) => item.status === "pending")
+                      .map((item) => (
+                        <tr key={item.submission_id}>
+                          <td>{item.student_name}</td>
+                          <td>
+                            {item.score} / {item.total_points}
+                          </td>
+                          <td>{item.submitted_at ? new Date(item.submitted_at).toLocaleString() : "-"}</td>
+                          <td>
+                            <button onClick={() => openPendingReview(item.submission_id)}>
+                              Review
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </>
         )}
       </div>
 
       <div className="card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="section-header">
           <h2>Recent Activity</h2>
           <button
             onClick={() => setExpandedRecent(!expandedRecent)}
-            style={{ padding: "0.5rem 1rem", cursor: "pointer" }}
+            className="toggle-chip"
           >
             {expandedRecent ? "▼ Hide" : "▶ Show"}
           </button>
         </div>
         {expandedRecent && (
-          <table>
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Score</th>
-                <th>Status</th>
-                <th>Submitted</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {summary.recent_activity.filter((item) => item.status !== "pending").map((item) => (
-                <tr key={item.submission_id}>
-                  <td>{item.student_name}</td>
-                  <td>
-                    {item.score} / {item.total_points}
-                  </td>
-                  <td>{item.status}</td>
-                  <td>{item.submitted_at ? new Date(item.submitted_at).toLocaleString() : "-"}</td>
-                  <td>
-                    {item.status === "pending" ? (
-                      <button onClick={() => openPendingReview(item.submission_id)}>
-                        Review
-                      </button>
-                    ) : (
-                      <span className="muted-text">-</span>
-                    )}
-                  </td>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Score</th>
+                  <th>Status</th>
+                  <th>Submitted</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {summary.recent_activity.filter((item) => item.status !== "pending").map((item) => (
+                  <tr key={item.submission_id}>
+                    <td>{item.student_name}</td>
+                    <td>
+                      {item.score} / {item.total_points}
+                    </td>
+                    <td>
+                      <span className={`status-pill ${item.status}`}>{item.status}</span>
+                    </td>
+                    <td>{item.submitted_at ? new Date(item.submitted_at).toLocaleString() : "-"}</td>
+                    <td>
+                      {item.status === "pending" ? (
+                        <button onClick={() => openPendingReview(item.submission_id)}>
+                          Review
+                        </button>
+                      ) : (
+                        <span className="muted-text">-</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

@@ -179,7 +179,10 @@ export default function TestsPage() {
 
   return (
     <div>
-      <h1>Tests</h1>
+      <div className="page-header">
+        <h1>Tests</h1>
+        <p className="page-subtitle">Create, edit, and manage tests with a compact workflow.</p>
+      </div>
       {error && <div className="error">{error}</div>}
 
       <section className="card">
@@ -187,14 +190,14 @@ export default function TestsPage() {
         <form onSubmit={onSubmit} className="test-form-layout">
           <div className="test-settings-panel">
             <h3>Test Settings</h3>
-            <div className="stack">
+            <div className="stack test-settings-stack">
               <label>Title<input value={title} onChange={(e) => setTitle(e.target.value)} required /></label>
-              <label>Description<textarea value={description} onChange={(e) => setDescription(e.target.value)} style={{ minHeight: "80px" }} /></label>
+              <label>Description<textarea className="compact-textarea" value={description} onChange={(e) => setDescription(e.target.value)} style={{ minHeight: "80px" }} /></label>
               <label>Subject<input value={subject} onChange={(e) => setSubject(e.target.value)} /></label>
               <label>
                 Assigned Groups
-                <div className="card" style={{ marginBottom: 0, marginTop: "6px" }}>
-                  <label className="checkbox-label" style={{ marginBottom: "6px" }}>
+                <div className="card group-picker-card" style={{ marginBottom: 0, marginTop: "6px" }}>
+                  <label className="checkbox-label group-checkbox" style={{ marginBottom: "6px" }}>
                     <input
                       type="checkbox"
                       checked={groupIds.length === 0}
@@ -207,7 +210,7 @@ export default function TestsPage() {
                     No group restriction (all students)
                   </label>
                   {groups.map((group) => (
-                    <label key={group.id} className="checkbox-label" style={{ marginBottom: "6px" }}>
+                    <label key={group.id} className="checkbox-label group-checkbox" style={{ marginBottom: "6px" }}>
                       <input
                         type="checkbox"
                         checked={groupIds.includes(group.id)}
@@ -223,6 +226,11 @@ export default function TestsPage() {
                       {group.name}
                     </label>
                   ))}
+                  {groupIds.length > 0 && (
+                    <p className="muted-text compact-hint" style={{ margin: 0 }}>
+                      {groupIds.length} group{groupIds.length > 1 ? "s" : ""} selected
+                    </p>
+                  )}
                   {groups.length === 0 && (
                     <p className="muted-text" style={{ margin: 0 }}>
                       No groups found. Create groups in the Groups section.
@@ -230,8 +238,10 @@ export default function TestsPage() {
                   )}
                 </div>
               </label>
-              <label>Start At<input type="datetime-local" value={startAt} onChange={(e) => setStartAt(e.target.value)} required /></label>
-              <label>End At<input type="datetime-local" value={endAt} onChange={(e) => setEndAt(e.target.value)} required /></label>
+              <div className="split test-meta-grid">
+                <label>Start At<input type="datetime-local" value={startAt} onChange={(e) => setStartAt(e.target.value)} required /></label>
+                <label>End At<input type="datetime-local" value={endAt} onChange={(e) => setEndAt(e.target.value)} required /></label>
+              </div>
               <label>Passing Score %<input type="number" value={passingScore} onChange={(e) => setPassingScore(Number(e.target.value))} min={0} max={100} /></label>
               <label className="checkbox-label">
                 <input type="checkbox" checked={randomize} onChange={(e) => setRandomize(e.target.checked)} />
@@ -245,7 +255,7 @@ export default function TestsPage() {
             <div className="questions-container">
               {questions.map((q, index) => (
                 <div key={index} className="question-box">
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                  <div className="question-box-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                     <strong>Question {index + 1}</strong>
                     {questions.length > 1 && (
                       <button
@@ -266,12 +276,12 @@ export default function TestsPage() {
                       <option value="paragraph">Paragraph</option>
                     </select>
                   </label>
-                  <label>Prompt<textarea value={q.prompt} onChange={(e) => updateQuestion(index, { prompt: e.target.value })} required /></label>
+                  <label>Prompt<textarea className="compact-textarea" value={q.prompt} onChange={(e) => updateQuestion(index, { prompt: e.target.value })} required /></label>
                   <label>Points<input type="number" value={q.points} onChange={(e) => updateQuestion(index, { points: Number(e.target.value) })} min={1} /></label>
                   {(q.question_type === "multiple_choice" || q.question_type === "true_false") && (
                     <>
                       {q.question_type === "multiple_choice" && (
-                        <div className="stack">
+                        <div className="mc-options-grid">
                           <label>
                             Option A
                             <input
@@ -342,60 +352,64 @@ export default function TestsPage() {
                 </div>
               ))}
             </div>
-            <button type="button" onClick={() => setQuestions((prev) => [...prev, defaultQuestion(prev.length)]) } style={{ width: "100%" }}>
+            <button className="full-width-btn" type="button" onClick={() => setQuestions((prev) => [...prev, defaultQuestion(prev.length)]) } style={{ width: "100%" }}>
               + Add Question
             </button>
           </div>
+          <div className="form-actions test-form-actions">
+            {editingTestId && (
+              <button type="button" onClick={resetForm} style={{ background: "var(--muted)" }}>
+                Cancel Edit
+              </button>
+            )}
+            <button type="submit">{editingTestId ? "Update Test" : "Save Test"}</button>
+          </div>
         </form>
-        
-        <div className="form-actions">
-          {editingTestId && (
-            <button type="button" onClick={resetForm} style={{ background: "var(--muted)" }}>
-              Cancel Edit
-            </button>
-          )}
-          <button type="submit" onClick={onSubmit}>{editingTestId ? "Update Test" : "Save Test"}</button>
-        </div>
       </section>
 
       <section className="card">
         <h2>All Tests</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Subject</th>
-              <th>Group</th>
-              <th>Status</th>
-              <th>Submissions</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tests.map((test: any) => (
-              <tr key={test.id}>
-                <td>{test.title}</td>
-                <td>{test.subject || "-"}</td>
-                <td>{(test.group_names && test.group_names.length > 0) ? test.group_names.join(", ") : (test.group_name || "All")}</td>
-                <td>{test.status}</td>
-                <td>{test.submission_count}</td>
-                <td className="inline-actions">
-                  <Link to={`/tests/${test.id}/results`}>Results</Link>
-                  <a href={`/test/${test.id}`} target="_blank" rel="noreferrer">Student Link</a>
-                  <button onClick={() => onEdit(test.id)}>Edit</button>
-                  <button
-                    onClick={async () => {
-                      await api.deleteTest(test.id);
-                      loadTests();
-                    }}
-                  >
-                    Delete
-                  </button>
-                </td>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Subject</th>
+                <th>Group</th>
+                <th>Status</th>
+                <th>Submissions</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {tests.map((test: any) => (
+                <tr key={test.id}>
+                  <td>{test.title}</td>
+                  <td>{test.subject || "-"}</td>
+                  <td>{(test.group_names && test.group_names.length > 0) ? test.group_names.join(", ") : (test.group_name || "All")}</td>
+                  <td>
+                    <span className={`status-pill ${test.status}`}>{test.status}</span>
+                  </td>
+                  <td>{test.submission_count}</td>
+                  <td className="inline-actions">
+                    <Link to={`/tests/${test.id}/results`}>Results</Link>
+                    <a href={`/test/${test.id}`} target="_blank" rel="noreferrer">Student Link</a>
+                    <button onClick={() => onEdit(test.id)}>Edit</button>
+                    <button
+                      className="danger-btn"
+                      onClick={async () => {
+                        await api.deleteTest(test.id);
+                        loadTests();
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   );

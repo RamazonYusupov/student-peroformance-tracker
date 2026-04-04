@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import { NavLink, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardPage from "./pages/DashboardPage";
@@ -13,24 +13,43 @@ import TestsPage from "./pages/TestsPage";
 
 function Shell({ children }: { children: ReactNode }) {
   const token = localStorage.getItem("teacher_token");
+  const navItems = [
+    { to: "/", label: "Dashboard" },
+    { to: "/tests", label: "Tests" },
+    { to: "/groups", label: "Groups" },
+    { to: "/students", label: "Students" },
+  ];
 
   return (
     <div className="app-shell">
       {token && (
         <aside className="sidebar">
-          <h2>Teacher Hub</h2>
-          <Link to="/">Dashboard</Link>
-          <Link to="/tests">Tests</Link>
-          <Link to="/groups">Groups</Link>
-          <Link to="/students">Students</Link>
-          <button
-            onClick={() => {
-              localStorage.removeItem("teacher_token");
-              window.location.href = "/login";
-            }}
-          >
-            Logout
-          </button>
+          <div className="sidebar-brand">
+            <h2>Teacher Hub</h2>
+            <p>Student Performance Tracker</p>
+          </div>
+          <nav className="sidebar-nav">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === "/"}
+                className={({ isActive }) => (isActive ? "active" : "")}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+          <div className="sidebar-footer">
+            <button
+              onClick={() => {
+                localStorage.removeItem("teacher_token");
+                window.location.href = "/login";
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </aside>
       )}
       <main className="main-content">{children}</main>

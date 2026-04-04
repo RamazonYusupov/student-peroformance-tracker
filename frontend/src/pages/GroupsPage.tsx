@@ -407,14 +407,27 @@ export default function GroupsPage() {
                         <td colSpan={2}>
                           <div className="group-students-panel">
                             {students.length ? (
-                              <ul className="group-students-list">
-                                {students.map((student) => (
-                                  <li key={`${group.id}-${student.student_id}`} className="group-student-item">
-                                    <span className="group-student-name">{student.full_name}</span>
-                                    <span className="group-student-id">{student.student_id}</span>
-                                  </li>
-                                ))}
-                              </ul>
+                              <>
+                                <p className="group-students-title">Students in this group</p>
+                                <table className="group-students-table">
+                                  <thead>
+                                    <tr>
+                                      <th>Full Name</th>
+                                      <th>Student ID</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {students.map((student) => (
+                                      <tr key={`${group.id}-${student.student_id}`}>
+                                        <td className="group-student-name">{student.full_name}</td>
+                                        <td>
+                                          <span className="group-student-id">{student.student_id}</span>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </>
                             ) : (
                               <p className="muted-text" style={{ margin: 0 }}>
                                 No students in this group.

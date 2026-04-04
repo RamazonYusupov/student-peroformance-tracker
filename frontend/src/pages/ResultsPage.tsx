@@ -49,7 +49,10 @@ export default function ResultsPage() {
 
   return (
     <div>
-      <h1>Results & Analytics</h1>
+      <div className="page-header">
+        <h1>Results & Analytics</h1>
+        <p className="page-subtitle">Review score distribution, trend lines, and each submission in one place.</p>
+      </div>
       {error && <div className="error">{error}</div>}
 
       {analytics && (
@@ -63,7 +66,7 @@ export default function ResultsPage() {
 
       <div className="card">
         <h2>Score Distribution</h2>
-        <div style={{ width: "100%", height: 260 }}>
+        <div className="chart-block" style={{ width: "100%", height: 260 }}>
           <ResponsiveContainer>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -78,7 +81,7 @@ export default function ResultsPage() {
 
       <div className="card">
         <h2>Group Results Over Time</h2>
-        <div style={{ width: "100%", height: 280 }}>
+        <div className="chart-block" style={{ width: "100%", height: 280 }}>
           <ResponsiveContainer>
             <LineChart data={groupTrendData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -100,30 +103,34 @@ export default function ResultsPage() {
 
       <div className="card">
         <h2>Submissions</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Student</th>
-              <th>Score</th>
-              <th>%</th>
-              <th>Status</th>
-              <th>Violations</th>
-              <th>Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {results.map((r) => (
-              <tr key={r.submission_id}>
-                <td>{r.student_name}</td>
-                <td>{r.score} / {r.total_points}</td>
-                <td>{r.percentage}</td>
-                <td>{r.status}</td>
-                <td>{r.violations}</td>
-                <td>{r.time_taken_seconds ? `${Math.ceil(r.time_taken_seconds / 60)}m` : "-"}</td>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Score</th>
+                <th>%</th>
+                <th>Status</th>
+                <th>Violations</th>
+                <th>Time</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {results.map((r) => (
+                <tr key={r.submission_id}>
+                  <td>{r.student_name}</td>
+                  <td>{r.score} / {r.total_points}</td>
+                  <td>{r.percentage}</td>
+                  <td>
+                    <span className={`status-pill ${r.status}`}>{r.status}</span>
+                  </td>
+                  <td>{r.violations}</td>
+                  <td>{r.time_taken_seconds ? `${Math.ceil(r.time_taken_seconds / 60)}m` : "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
