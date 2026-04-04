@@ -247,6 +247,20 @@ class StudentProfileRow(BaseModel):
     time_taken_seconds: int | None
 
 
+class GroupStudentProfile(BaseModel):
+    group_id: str
+    group_name: str
+    full_name: str
+    student_id: str
+    total_tests_taken: int
+    average_score: float
+    pass_rate: float
+    total_violations: int
+    last_active: datetime | None
+    subjects: list[str] = Field(default_factory=list)
+    history: list[StudentProfileRow]
+
+
 class StudentProfile(BaseModel):
     student_name: str
     total_tests_taken: int

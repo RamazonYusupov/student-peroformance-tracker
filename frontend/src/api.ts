@@ -115,16 +115,9 @@ export const api = {
     return parseJson(response);
   },
 
-  listStudents: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/students`, {
-      headers: { ...authHeaders() },
-    });
-    return parseJson(response);
-  },
-
-  getStudentProfile: async (studentName: string) => {
+  getGroupStudentProfile: async (groupId: string, studentId: string) => {
     const response = await fetch(
-      `${API_BASE_URL}/api/students/${encodeURIComponent(studentName)}`,
+      `${API_BASE_URL}/api/groups/${groupId}/students/${encodeURIComponent(studentId)}/profile`,
       {
         headers: { ...authHeaders() },
       },

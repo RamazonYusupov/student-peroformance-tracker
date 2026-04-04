@@ -132,6 +132,20 @@ export interface GroupEntity {
   created_at?: string;
 }
 
+export interface GroupStudentProfile {
+  group_id: string;
+  group_name: string;
+  full_name: string;
+  student_id: string;
+  total_tests_taken: number;
+  average_score: number;
+  pass_rate: number;
+  total_violations: number;
+  last_active?: string | null;
+  subjects: string[];
+  history: StudentProfileRow[];
+}
+
 export interface GroupResultsPoint {
   date: string;
   average_percentage: number;

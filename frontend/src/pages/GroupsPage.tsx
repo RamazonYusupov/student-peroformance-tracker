@@ -1,7 +1,16 @@
-import { FormEvent, Fragment, useEffect, useState } from "react";
+import { FormEvent, Fragment, useEffect, useMemo, useState } from "react";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import { api } from "../api";
-import { GroupEntity, GroupStudent } from "../types";
+import { GroupEntity, GroupStudent, GroupStudentProfile } from "../types";
 
 type GroupEditState = {
   name: string;
@@ -10,8 +19,19 @@ type GroupEditState = {
   addStudentId: string;
 };
 
+type SelectedStudentState = {
+  groupId: string;
+  groupName: string;
+  fullName: string;
+  studentId: string;
+};
+
 function normalizeText(value: string) {
   return value.trim().replace(/\s+/g, " ");
+}
+
+function normalizeLookup(value: string) {
+  return normalizeText(value).toLowerCase();
 }
 
 function hasDuplicateStudents(students: GroupStudent[]) {
@@ -35,6 +55,10 @@ export default function GroupsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState("");
   const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<SelectedStudentState | null>(null);
+  const [selectedStudentProfile, setSelectedStudentProfile] = useState<GroupStudentProfile | null>(null);
+  const [selectedStudentLoading, setSelectedStudentLoading] = useState(false);
+  const [selectedStudentError, setSelectedStudentError] = useState("");
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [savingGroupId, setSavingGroupId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -67,6 +91,17 @@ export default function GroupsPage() {
   useEffect(() => {
     loadGroups();
   }, []);
+
+  const studentTrendData = useMemo(() => {
+    if (!selectedStudentProfile) return [] as Array<Record<string, string | number>>;
+    return selectedStudentProfile.history
+      .filter((row) => row.submitted_at)
+      .map((row) => ({
+        date: new Date(row.submitted_at as string).toLocaleDateString(),
+        percentage: row.percentage,
+        test_title: row.test_title,
+      }));
+  }, [selectedStudentProfile]);
 
   const addStudentToDraft = () => {
     const fullName = normalizeText(studentFullName);
@@ -135,6 +170,11 @@ export default function GroupsPage() {
       if (selectedGroupId === groupId) {
         setSelectedGroupId("");
       }
+      if (selectedStudent?.groupId === groupId) {
+        setSelectedStudent(null);
+        setSelectedStudentProfile(null);
+        setSelectedStudentError("");
+      }
       if (expandedGroupId === groupId) {
         setExpandedGroupId(null);
       }
@@ -142,6 +182,26 @@ export default function GroupsPage() {
       loadGroups();
     } catch (e) {
       setError((e as Error).message);
+    }
+  };
+
+  const openStudentProfile = async (group: GroupEntity, student: GroupStudent) => {
+    setSelectedStudent({
+      groupId: group.id,
+      groupName: group.name,
+      fullName: student.full_name,
+      studentId: student.student_id,
+    });
+    setSelectedStudentLoading(true);
+    setSelectedStudentError("");
+    try {
+      const profile = (await api.getGroupStudentProfile(group.id, student.student_id)) as GroupStudentProfile;
+      setSelectedStudentProfile(profile);
+    } catch (e) {
+      setSelectedStudentProfile(null);
+      setSelectedStudentError((e as Error).message);
+    } finally {
+      setSelectedStudentLoading(false);
     }
   };
 
@@ -379,6 +439,10 @@ export default function GroupsPage() {
               {groups.map((group) => {
                 const isExpanded = expandedGroupId === group.id;
                 const students = group.students || [];
+                const groupSelectedStudent = selectedStudent?.groupId === group.id ? selectedStudent : null;
+                const groupSelectedProfile = selectedStudentProfile && groupSelectedStudent && selectedStudentProfile.group_id === group.id
+                  ? selectedStudentProfile
+                  : null;
 
                 return (
                   <Fragment key={group.id}>
@@ -417,16 +481,154 @@ export default function GroupsPage() {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {students.map((student) => (
-                                      <tr key={`${group.id}-${student.student_id}`}>
-                                        <td className="group-student-name">{student.full_name}</td>
-                                        <td>
-                                          <span className="group-student-id">{student.student_id}</span>
-                                        </td>
-                                      </tr>
-                                    ))}
+                                    {students.map((student) => {
+                                      const isSelected =
+                                        selectedStudent?.groupId === group.id &&
+                                        selectedStudent.studentId === student.student_id;
+
+                                      return (
+                                        <tr key={`${group.id}-${student.student_id}`} className={isSelected ? "group-student-row active" : "group-student-row"}>
+                                          <td>
+                                            <button
+                                              type="button"
+                                              className={`group-student-button ${isSelected ? "active" : ""}`}
+                                              onClick={() => openStudentProfile(group, student)}
+                                            >
+                                              <span className="group-student-name">{student.full_name}</span>
+                                              <span className="group-student-action">{isSelected ? "Selected" : "View profile"}</span>
+                                            </button>
+                                          </td>
+                                          <td>
+                                            <span className="group-student-id">{student.student_id}</span>
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
                                   </tbody>
                                 </table>
+                                {groupSelectedStudent && (
+                                  <div className="student-detail-panel">
+                                    <div className="student-detail-header">
+                                      <div>
+                                        <p className="group-students-title" style={{ marginBottom: "6px" }}>
+                                          Student profile
+                                        </p>
+                                        <h3 style={{ marginBottom: "4px" }}>
+                                          {groupSelectedStudent.fullName}
+                                        </h3>
+                                        <p className="muted-text" style={{ margin: 0 }}>
+                                          Student ID: {groupSelectedStudent.studentId} · Group: {groupSelectedStudent.groupName}
+                                        </p>
+                                      </div>
+                                      {selectedStudentLoading && (
+                                        <span className="toggle-chip">Loading...</span>
+                                      )}
+                                    </div>
+
+                                    {selectedStudentError && <div className="error">{selectedStudentError}</div>}
+
+                                    {groupSelectedProfile && (
+                                      <>
+                                        <div className="stat-grid student-stat-grid">
+                                          <div className="card stat student-stat-card"><h3>Tests Taken</h3><span>{groupSelectedProfile.total_tests_taken}</span></div>
+                                          <div className="card stat student-stat-card"><h3>Average</h3><span>{groupSelectedProfile.average_score}%</span></div>
+                                          <div className="card stat student-stat-card"><h3>Pass Rate</h3><span>{groupSelectedProfile.pass_rate}%</span></div>
+                                          <div className="card stat student-stat-card"><h3>Violations</h3><span>{groupSelectedProfile.total_violations}</span></div>
+                                        </div>
+
+                                        <div className="student-detail-grid">
+                                          <div className="card student-summary-card">
+                                            <h3>Subjects Taken</h3>
+                                            {groupSelectedProfile.subjects.length ? (
+                                              <div className="subject-chip-list">
+                                                {groupSelectedProfile.subjects.map((subject) => (
+                                                  <span key={subject} className="subject-chip">{subject}</span>
+                                                ))}
+                                              </div>
+                                            ) : (
+                                              <p className="muted-text" style={{ margin: 0 }}>No subject data yet.</p>
+                                            )}
+
+                                            <div className="student-meta-grid">
+                                              <div>
+                                                <span className="student-meta-label">Last active</span>
+                                                <strong>{groupSelectedProfile.last_active ? new Date(groupSelectedProfile.last_active).toLocaleString() : "-"}</strong>
+                                              </div>
+                                              <div>
+                                                <span className="student-meta-label">Group</span>
+                                                <strong>{groupSelectedProfile.group_name}</strong>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <div className="card student-chart-card">
+                                            <h3>Results Over Time</h3>
+                                            {studentTrendData.length ? (
+                                              <div className="chart-block student-chart-block">
+                                                <ResponsiveContainer>
+                                                  <LineChart data={studentTrendData}>
+                                                    <CartesianGrid strokeDasharray="3 3" />
+                                                    <XAxis dataKey="date" />
+                                                    <YAxis domain={[0, 100]} />
+                                                    <Tooltip />
+                                                    <Line
+                                                      type="monotone"
+                                                      dataKey="percentage"
+                                                      stroke="#0f8b8d"
+                                                      strokeWidth={3}
+                                                      dot={{ r: 4 }}
+                                                      name="Percentage"
+                                                    />
+                                                  </LineChart>
+                                                </ResponsiveContainer>
+                                              </div>
+                                            ) : (
+                                              <p className="muted-text" style={{ margin: 0 }}>No dated results available yet.</p>
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        <div className="card">
+                                          <h3>Recent Results</h3>
+                                          {groupSelectedProfile.history.length ? (
+                                            <div className="table-wrap">
+                                              <table className="student-history-table">
+                                                <thead>
+                                                  <tr>
+                                                    <th>Test</th>
+                                                    <th>Subject</th>
+                                                    <th>%</th>
+                                                    <th>Status</th>
+                                                    <th>Date</th>
+                                                  </tr>
+                                                </thead>
+                                                <tbody>
+                                                  {[...groupSelectedProfile.history]
+                                                    .slice()
+                                                    .reverse()
+                                                    .slice(0, 5)
+                                                    .map((row) => (
+                                                      <tr key={`${row.test_id}-${row.submitted_at}`}>
+                                                        <td>{row.test_title}</td>
+                                                        <td>{row.subject || "-"}</td>
+                                                        <td>{row.percentage}</td>
+                                                        <td>
+                                                          <span className={`status-pill ${row.status}`}>{row.status}</span>
+                                                        </td>
+                                                        <td>{row.submitted_at ? new Date(row.submitted_at).toLocaleDateString() : "-"}</td>
+                                                      </tr>
+                                                    ))}
+                                                </tbody>
+                                              </table>
+                                            </div>
+                                          ) : (
+                                            <p className="muted-text" style={{ margin: 0 }}>No submissions found for this student yet.</p>
+                                          )}
+                                        </div>
+                                      </>
+                                    )}
+                                  </div>
+                                )}
                               </>
                             ) : (
                               <p className="muted-text" style={{ margin: 0 }}>
