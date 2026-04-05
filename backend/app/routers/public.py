@@ -279,6 +279,7 @@ def submit_test(
 
     answer_map = {a.question_id: a for a in payload.answers}
     existing = {a.question_id: a for a in submission.answers}
+    penalized_question_ids = set(payload.penalized_question_ids)
 
     for question in test.questions:
         incoming = answer_map.get(question.id)
@@ -296,6 +297,10 @@ def submit_test(
         entity.answer_text = answer_text
         entity.is_correct = is_correct
         entity.awarded_points = awarded_points
+
+        if question.id in penalized_question_ids:
+            entity.is_correct = False
+            entity.awarded_points = 0.0
 
     submission.violations = payload.violations
     submission.force_fail = payload.forced_fail or payload.violations >= 3

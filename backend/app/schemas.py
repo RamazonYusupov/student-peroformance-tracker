@@ -166,6 +166,7 @@ class StudentSubmitRequest(BaseModel):
     session_token: str
     violations: int = 0
     forced_fail: bool = False
+    penalized_question_ids: list[int] = Field(default_factory=list)
     answers: list[StudentAnswerPayload]
 
 

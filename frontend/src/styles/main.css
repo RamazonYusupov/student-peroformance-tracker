@@ -178,6 +178,12 @@ table {
   background: #e7eaef;
 }
 
+.danger-text {
+  color: var(--danger);
+  font-weight: 700;
+  margin-top: 10px;
+}
+
 .danger-btn {
   background: linear-gradient(140deg, #b11a31, #8f1328);
 }

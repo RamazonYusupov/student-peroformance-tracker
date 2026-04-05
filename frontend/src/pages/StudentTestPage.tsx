@@ -11,6 +11,7 @@ type NavigatorWithKeyboardLock = Navigator & {
 };
 
 const WARNING_LIMIT = 3;
+const VIOLATION_DEBOUNCE_MS = 1000;
 
 function parseServerDateToMs(value: string | null | undefined) {
   if (!value) return Number.NaN;
@@ -36,30 +37,49 @@ export default function StudentTestPage() {
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [warning, setWarning] = useState("");
   const [isFullscreenLost, setIsFullscreenLost] = useState(false);
+  const [penalizedQuestionIds, setPenalizedQuestionIds] = useState<Set<number>>(new Set());
   const submittingRef = useRef(false);
   const hadFullscreenRef = useRef(false);
-  const hasRegisteredViolationForCurrentLossRef = useRef(false);
   const violationsRef = useRef(0);
   const lastOverlayTapRef = useRef(0);
+  const penalizedQuestionIdsRef = useRef<Set<number>>(new Set());
+  const currentQuestionIdRef = useRef<number | null>(null);
+  const lastViolationAtRef = useRef(0);
 
   const registerViolation = (reason: string, isFullscreenViolation = false) => {
     if (submittingRef.current) return;
-
-    if (isFullscreenViolation) {
-      if (hasRegisteredViolationForCurrentLossRef.current) return;
-      hasRegisteredViolationForCurrentLossRef.current = true;
-    }
+    const now = Date.now();
+    if (now - lastViolationAtRef.current < VIOLATION_DEBOUNCE_MS) return;
+    lastViolationAtRef.current = now;
 
     const next = Math.min(WARNING_LIMIT, violationsRef.current + 1);
     violationsRef.current = next;
     setViolations(next);
 
+    const currentQuestionId = currentQuestionIdRef.current;
+    if (currentQuestionId !== null && !penalizedQuestionIdsRef.current.has(currentQuestionId)) {
+      const nextPenalized = new Set(penalizedQuestionIdsRef.current);
+      nextPenalized.add(currentQuestionId);
+      penalizedQuestionIdsRef.current = nextPenalized;
+      setPenalizedQuestionIds(nextPenalized);
+
+      // Keep the answer blank locally; backend enforces zero points for penalized questions.
+      setAnswers((prev) => ({ ...prev, [currentQuestionId]: "" }));
+    }
+
+    setIndex((previousIndex) => {
+      const totalQuestions = session?.questions?.length ?? 0;
+      if (totalQuestions === 0) return previousIndex;
+      return Math.min(previousIndex + 1, totalQuestions - 1);
+    });
+
     const optionsLeft = Math.max(0, WARNING_LIMIT - next);
-    setWarning(`${reason}. ${optionsLeft} attempt${optionsLeft === 1 ? "" : "s"} left.`);
+    setWarning(
+      `${reason}. 1 attempt deducted. Current question marked incorrect. ${optionsLeft} attempt${optionsLeft === 1 ? "" : "s"} left.`
+    );
 
     if (next >= WARNING_LIMIT) {
       submitNow(false, true, next).catch(() => undefined);
-      return;
     }
   };
 
@@ -70,7 +90,6 @@ export default function StudentTestPage() {
       await (navigator as NavigatorWithKeyboardLock).keyboard?.lock?.(["Escape"]);
       setWarning("");
       setIsFullscreenLost(false);
-      hasRegisteredViolationForCurrentLossRef.current = false;
     } catch {
       setWarning("Fullscreen is required. Double-tap/click the red overlay to retry.");
     }
@@ -86,7 +105,11 @@ export default function StudentTestPage() {
     const parsed = JSON.parse(raw);
     setSession(parsed);
     setViolations(0);
+    setPenalizedQuestionIds(new Set());
     violationsRef.current = 0;
+    penalizedQuestionIdsRef.current = new Set();
+    currentQuestionIdRef.current = null;
+    lastViolationAtRef.current = 0;
     setSecondsLeft(getRemainingSeconds(parsed.end_at));
   }, [navigate, testId]);
 
@@ -121,7 +144,6 @@ export default function StudentTestPage() {
           await (navigator as NavigatorWithKeyboardLock).keyboard?.lock?.(["Escape"]);
           setWarning("");
           setIsFullscreenLost(false);
-          hasRegisteredViolationForCurrentLossRef.current = false;
         } catch {
           setWarning("Fullscreen is required for this test.");
         }
@@ -129,12 +151,11 @@ export default function StudentTestPage() {
         hadFullscreenRef.current = true;
         await (navigator as NavigatorWithKeyboardLock).keyboard?.lock?.(["Escape"]);
         setIsFullscreenLost(false);
-        hasRegisteredViolationForCurrentLossRef.current = false;
       }
     };
 
     const onVisibility = () => {
-      if (document.hidden && !document.fullscreenElement) {
+      if (document.hidden) {
         registerViolation("Screen switch detected", true);
       }
     };
@@ -145,7 +166,6 @@ export default function StudentTestPage() {
         (navigator as NavigatorWithKeyboardLock).keyboard?.lock?.(["Escape"]).catch(() => undefined);
         setWarning("");
         setIsFullscreenLost(false);
-        hasRegisteredViolationForCurrentLossRef.current = false;
         return;
       }
 
@@ -191,7 +211,7 @@ export default function StudentTestPage() {
     };
 
     const onBlur = () => {
-      if (!submittingRef.current && !document.fullscreenElement) {
+      if (!submittingRef.current) {
         registerViolation("Window focus lost", true);
       }
     };
@@ -236,6 +256,12 @@ export default function StudentTestPage() {
     return session.questions[index];
   }, [session, index]);
 
+  useEffect(() => {
+    currentQuestionIdRef.current = currentQuestion?.id ?? null;
+  }, [currentQuestion]);
+
+  const isCurrentQuestionPenalized = currentQuestion ? penalizedQuestionIds.has(currentQuestion.id) : false;
+
   const submitNow = async (timeExpired = false, forcedFail = false, forceViolations?: number) => {
     if (!session || !testId || submittingRef.current) return;
     submittingRef.current = true;
@@ -244,6 +270,7 @@ export default function StudentTestPage() {
       session_token: session.session_token,
       violations: forceViolations ?? violationsRef.current,
       forced_fail: forcedFail,
+      penalized_question_ids: Array.from(penalizedQuestionIdsRef.current),
       answers: session.questions.map((q: any) => ({
         question_id: q.id,
         answer_text: answers[q.id] || "",
@@ -338,6 +365,7 @@ export default function StudentTestPage() {
                   type="radio"
                   name={`q_${currentQuestion.id}`}
                   checked={answers[currentQuestion.id] === opt}
+                  disabled={isCurrentQuestionPenalized}
                   onChange={() => setAnswers((prev) => ({ ...prev, [currentQuestion.id]: opt }))}
                 />
                 {opt}
@@ -349,9 +377,14 @@ export default function StudentTestPage() {
         {(currentQuestion.question_type === "short_answer" || currentQuestion.question_type === "paragraph") && (
           <textarea
             value={answers[currentQuestion.id] || ""}
+            disabled={isCurrentQuestionPenalized}
             onChange={(e) => setAnswers((prev) => ({ ...prev, [currentQuestion.id]: e.target.value }))}
             rows={currentQuestion.question_type === "paragraph" ? 8 : 3}
           />
+        )}
+
+        {isCurrentQuestionPenalized && (
+          <p className="danger-text">This question was marked incorrect due to a screen-switch violation and cannot be changed.</p>
         )}
 
         <div className="inline-actions">
