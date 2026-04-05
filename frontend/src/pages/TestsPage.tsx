@@ -476,8 +476,8 @@ export default function TestsPage() {
       </section>
 
       {deleteTarget && (
-        <div className="delete-confirm-backdrop" onClick={closeDeletePopup}>
-          <section className="card delete-confirm-panel" onClick={(event) => event.stopPropagation()}>
+        <div className="delete-confirm-backdrop">
+          <section className="card delete-confirm-panel">
             <h2>Delete Test</h2>
             <p>
               Type this title to confirm deletion:
