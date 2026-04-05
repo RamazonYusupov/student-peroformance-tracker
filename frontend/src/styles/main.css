@@ -90,7 +90,7 @@ label {
 button {
   border: none;
   border-radius: 12px;
-  padding: 10px 14px;
+  padding: 9px 13px;
   background: linear-gradient(140deg, #0f8b8d, #137476);
   color: #fff;
   font-weight: 700;
@@ -186,6 +186,61 @@ table {
 
 .danger-btn {
   background: linear-gradient(140deg, #b11a31, #8f1328);
+}
+
+.btn-primary {
+  background: linear-gradient(140deg, #0f8b8d, #137476);
+}
+
+.btn-secondary {
+  background: linear-gradient(140deg, #6f7e63, #58664f);
+}
+
+.btn-danger {
+  background: linear-gradient(140deg, #b11a31, #8f1328);
+}
+
+.btn-ghost {
+  background: #eef4e9;
+  color: #2e3d27;
+  box-shadow: none;
+  border: 1px solid #cddbc0;
+}
+
+.btn-ghost:hover {
+  box-shadow: none;
+  background: #e6efe0;
+}
+
+.btn-sm {
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.btn-link-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid #c5d9cb;
+  color: #174c3c;
+  background: #eaf4ee;
+  text-decoration: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.btn-link-chip:hover {
+  background: #deede4;
+  color: #123d30;
+  box-shadow: none;
+  transform: none;
+  filter: none;
 }
 
 th,
@@ -368,6 +423,15 @@ tbody tr:nth-child(2n) {
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.row-actions {
+  gap: 8px;
+}
+
+.row-actions button,
+.row-actions a {
+  margin: 0;
 }
 
 .question-box {
@@ -902,6 +966,60 @@ tbody tr:nth-child(2n) {
   min-height: 500px;
 }
 
+.tests-header-row {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.test-composer-card {
+  border: 1px solid #d9e5ce;
+  box-shadow: 0 14px 38px #0b24121f;
+}
+
+.delete-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: #0f1c142e;
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  padding: 20px 16px;
+  z-index: 1300;
+}
+
+.delete-confirm-panel {
+  width: min(620px, 100%);
+  border: 1px solid #d7e3cc;
+  box-shadow: 0 18px 42px #071d102e;
+  animation: drop-from-top 0.24s ease-out;
+}
+
+.delete-confirm-title {
+  margin-top: -4px;
+  margin-bottom: 10px;
+  font-weight: 800;
+  color: #213922;
+  background: #edf6e7;
+  border: 1px dashed #b8ccaf;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+@keyframes drop-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-32px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .test-settings-panel {
   border-right: 1px solid var(--line);
   padding-right: 16px;
@@ -1049,6 +1167,11 @@ tbody tr:nth-child(2n) {
 }
 
 @media (max-width: 900px) {
+  .tests-header-row {
+    align-items: start;
+    flex-direction: column;
+  }
+
   .test-form-layout {
     grid-template-columns: 1fr;
     gap: 12px;

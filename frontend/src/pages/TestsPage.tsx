@@ -18,6 +18,10 @@ function defaultQuestion(index: number): Question {
 export default function TestsPage() {
   const [tests, setTests] = useState<TestEntity[]>([]);
   const [groups, setGroups] = useState<GroupEntity[]>([]);
+  const [isComposerOpen, setIsComposerOpen] = useState(false);
+  const [copiedTestId, setCopiedTestId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<TestEntity | null>(null);
+  const [deleteTitleInput, setDeleteTitleInput] = useState("");
   const [editingTestId, setEditingTestId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -60,6 +64,7 @@ export default function TestsPage() {
     setPassingScore(60);
     setRandomize(false);
     setQuestions([defaultQuestion(0)]);
+    setIsComposerOpen(false);
   };
 
   const toDateTimeLocalValue = (isoDate: string) => {
@@ -117,6 +122,7 @@ export default function TestsPage() {
           ? (test.questions || []).map((question, index) => toFormQuestion(question, index))
           : [defaultQuestion(0)],
       );
+      setIsComposerOpen(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
       setError((e as Error).message);
@@ -177,16 +183,69 @@ export default function TestsPage() {
     }
   };
 
+  const copyStudentLink = async (testId: string) => {
+    const url = `${window.location.origin}/test/${testId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedTestId(testId);
+      window.setTimeout(() => {
+        setCopiedTestId((prev) => (prev === testId ? null : prev));
+      }, 1500);
+    } catch {
+      setError("Unable to copy link. Please copy it manually.");
+    }
+  };
+
+  const openDeletePopup = (test: TestEntity) => {
+    setDeleteTarget(test);
+    setDeleteTitleInput("");
+    setError("");
+  };
+
+  const closeDeletePopup = () => {
+    setDeleteTarget(null);
+    setDeleteTitleInput("");
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    if (deleteTitleInput.trim() !== deleteTarget.title) {
+      setError("Delete cancelled: title did not match.");
+      return;
+    }
+
+    await api.deleteTest(deleteTarget.id);
+    closeDeletePopup();
+    loadTests();
+  };
+
   return (
     <div>
-      <div className="page-header">
-        <h1>Tests</h1>
-        <p className="page-subtitle">Create, edit, and manage tests with a compact workflow.</p>
+      <div className="page-header tests-header-row">
+        <div>
+          <h1>Tests</h1>
+          <p className="page-subtitle">Create, edit, and manage tests with a compact workflow.</p>
+        </div>
+        {!isComposerOpen && (
+          <button className="btn-primary" onClick={() => setIsComposerOpen(true)}>
+            Create Test
+          </button>
+        )}
       </div>
       {error && <div className="error">{error}</div>}
 
-      <section className="card">
-        <h2>{editingTestId ? "Update Test" : "Create Test"}</h2>
+      {isComposerOpen && (
+      <section className="card test-composer-card">
+        <div className="section-header">
+          <h2>{editingTestId ? "Update Test" : "Create Test"}</h2>
+          <button
+            type="button"
+            className="btn-ghost"
+            onClick={resetForm}
+          >
+            Close
+          </button>
+        </div>
         <form onSubmit={onSubmit} className="test-form-layout">
           <div className="test-settings-panel">
             <h3>Test Settings</h3>
@@ -260,8 +319,8 @@ export default function TestsPage() {
                     {questions.length > 1 && (
                       <button
                         type="button"
+                        className="btn-danger btn-sm"
                         onClick={() => setQuestions((prev) => prev.filter((_, i) => i !== index))}
-                        style={{ padding: "4px 8px", fontSize: "12px", background: "var(--danger)" }}
                       >
                         Remove
                       </button>
@@ -352,20 +411,21 @@ export default function TestsPage() {
                 </div>
               ))}
             </div>
-            <button className="full-width-btn" type="button" onClick={() => setQuestions((prev) => [...prev, defaultQuestion(prev.length)]) } style={{ width: "100%" }}>
+            <button className="full-width-btn btn-secondary" type="button" onClick={() => setQuestions((prev) => [...prev, defaultQuestion(prev.length)]) } style={{ width: "100%" }}>
               + Add Question
             </button>
           </div>
           <div className="form-actions test-form-actions">
             {editingTestId && (
-              <button type="button" onClick={resetForm} style={{ background: "var(--muted)" }}>
+              <button type="button" className="btn-secondary" onClick={resetForm}>
                 Cancel Edit
               </button>
             )}
-            <button type="submit">{editingTestId ? "Update Test" : "Save Test"}</button>
+            <button type="submit" className="btn-primary">{editingTestId ? "Update Test" : "Save Test"}</button>
           </div>
         </form>
       </section>
+      )}
 
       <section className="card">
         <h2>All Tests</h2>
@@ -391,16 +451,19 @@ export default function TestsPage() {
                     <span className={`status-pill ${test.status}`}>{test.status}</span>
                   </td>
                   <td>{test.submission_count}</td>
-                  <td className="inline-actions">
-                    <Link to={`/tests/${test.id}/results`}>Results</Link>
-                    <a href={`/test/${test.id}`} target="_blank" rel="noreferrer">Student Link</a>
-                    <button onClick={() => onEdit(test.id)}>Edit</button>
+                  <td className="inline-actions row-actions">
+                    <Link className="btn-link-chip" to={`/tests/${test.id}/results`}>Results</Link>
                     <button
-                      className="danger-btn"
-                      onClick={async () => {
-                        await api.deleteTest(test.id);
-                        loadTests();
-                      }}
+                      className="btn-link-chip"
+                      onClick={() => copyStudentLink(test.id)}
+                      title="Copy student test link"
+                    >
+                      {copiedTestId === test.id ? "Copied" : "Copy Student Link"}
+                    </button>
+                    <button className="btn-secondary btn-sm" onClick={() => onEdit(test.id)}>Edit</button>
+                    <button
+                      className="btn-danger btn-sm"
+                      onClick={() => openDeletePopup(test)}
                     >
                       Delete
                     </button>
@@ -411,6 +474,40 @@ export default function TestsPage() {
           </table>
         </div>
       </section>
+
+      {deleteTarget && (
+        <div className="delete-confirm-backdrop" onClick={closeDeletePopup}>
+          <section className="card delete-confirm-panel" onClick={(event) => event.stopPropagation()}>
+            <h2>Delete Test</h2>
+            <p>
+              Type this title to confirm deletion:
+            </p>
+            <p className="delete-confirm-title">{deleteTarget.title}</p>
+            <label>
+              Confirm Title
+              <input
+                value={deleteTitleInput}
+                onChange={(event) => setDeleteTitleInput(event.target.value)}
+                autoFocus
+              />
+            </label>
+            <div className="inline-actions row-actions" style={{ justifyContent: "flex-end" }}>
+              <button className="btn-ghost" type="button" onClick={closeDeletePopup}>
+                Cancel
+              </button>
+              <button
+                className="btn-danger"
+                type="button"
+                onClick={() => {
+                  confirmDelete().catch((e: Error) => setError(e.message));
+                }}
+              >
+                Delete Permanently
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
