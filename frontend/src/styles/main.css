@@ -1,19 +1,19 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap");
 
 :root {
-  --bg: #f4efe4;
-  --bg-alt: #ece4d4;
-  --ink: #132126;
-  --muted: #5c666c;
+  --bg: #eef3fb;
+  --bg-alt: #dbe6fb;
+  --ink: #122238;
+  --muted: #5a6678;
   --card: #fffffff2;
   --card-strong: #ffffff;
-  --accent: #0b7b6f;
-  --accent-2: #cf7b36;
+  --accent: #2563eb;
+  --accent-2: #f97316;
   --danger: #be1f2f;
-  --line: #d6d5c7;
-  --line-strong: #bab9a9;
-  --shadow-soft: 0 16px 34px #12231b14;
-  --shadow-hard: 0 20px 48px #111a1e2e;
+  --line: #d4ddeb;
+  --line-strong: #b8c7df;
+  --shadow-soft: 0 16px 34px #12254a14;
+  --shadow-hard: 0 20px 48px #111f452e;
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 24px;
@@ -30,10 +30,10 @@ body {
   color: var(--ink);
   line-height: 1.45;
   background:
-    radial-gradient(circle at 14% 10%, #c8dccc 0%, transparent 37%),
-    radial-gradient(circle at 90% 0%, #ffd8b7 0%, transparent 32%),
-    radial-gradient(circle at 78% 90%, #d8e5cc 0%, transparent 28%),
-    linear-gradient(180deg, #fffaf0 0%, #f5f0e5 36%, #ece5d7 100%),
+    radial-gradient(circle at 12% 10%, #cfe0ff 0%, transparent 38%),
+    radial-gradient(circle at 90% 0%, #ffd6bd 0%, transparent 34%),
+    radial-gradient(circle at 78% 90%, #dbe7ff 0%, transparent 29%),
+    linear-gradient(180deg, #f9fbff 0%, #f0f5ff 40%, #e7eefb 100%),
     var(--bg);
   background-attachment: fixed;
 }
@@ -62,7 +62,7 @@ a {
 }
 
 a:hover {
-  color: #085f56;
+  color: #1e4fbe;
 }
 
 button,
@@ -87,9 +87,9 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: #66a385;
-  box-shadow: 0 0 0 4px #0f8b8d22;
-  background: #fcfffb;
+  border-color: #6b8df5;
+  box-shadow: 0 0 0 4px #2563eb22;
+  background: #fbfdff;
 }
 
 label {
@@ -102,18 +102,18 @@ button {
   border: none;
   border-radius: 12px;
   padding: 9px 14px;
-  background: linear-gradient(140deg, #0b7b6f, #0e6a6e);
+  background: linear-gradient(140deg, #2563eb, #1e4ed8);
   color: #fff;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 10px 20px #0f68502e;
+  box-shadow: 0 10px 20px #1a46b22e;
   transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease, background 0.18s ease;
 }
 
 button:hover {
   filter: brightness(1.05);
   transform: translateY(-1px);
-  box-shadow: 0 12px 24px #0f8b8d3d;
+  box-shadow: 0 12px 24px #1d4ed83d;
 }
 
 button:active {
@@ -181,8 +181,8 @@ table {
 }
 
 .status-pill.active {
-  color: #0d4f4c;
-  background: #d7efef;
+  color: #1b3f84;
+  background: #dce8ff;
 }
 
 .status-pill.closed {
@@ -201,11 +201,11 @@ table {
 }
 
 .btn-primary {
-  background: linear-gradient(140deg, #0f8b8d, #137476);
+  background: linear-gradient(140deg, #2563eb, #1e4ed8);
 }
 
 .btn-secondary {
-  background: linear-gradient(140deg, #6f7e63, #58664f);
+  background: linear-gradient(140deg, #5b6a86, #475472);
 }
 
 .btn-danger {
@@ -213,15 +213,15 @@ table {
 }
 
 .btn-ghost {
-  background: #eef4e9;
-  color: #2e3d27;
+  background: #edf3ff;
+  color: #23365f;
   box-shadow: none;
-  border: 1px solid #cddbc0;
+  border: 1px solid #c8d7f0;
 }
 
 .btn-ghost:hover {
   box-shadow: none;
-  background: #e6efe0;
+  background: #e4edff;
 }
 
 .btn-sm {
@@ -239,17 +239,17 @@ table {
   border-radius: 999px;
   font-size: 12px;
   font-weight: 800;
-  border: 1px solid #c5d9cb;
-  color: #174c3c;
-  background: #eaf4ee;
+  border: 1px solid #c8d8f2;
+  color: #1f3f7c;
+  background: #edf4ff;
   text-decoration: none;
   box-shadow: none;
   cursor: pointer;
 }
 
 .btn-link-chip:hover {
-  background: #deede4;
-  color: #123d30;
+  background: #e3eeff;
+  color: #1a3670;
   box-shadow: none;
   transform: none;
   filter: none;
@@ -258,15 +258,15 @@ table {
 th,
 td {
   text-align: left;
-  border-bottom: 1px solid #e4ecda;
+  border-bottom: 1px solid #e2e9f5;
   padding: 11px 12px;
   font-size: 14px;
 }
 
 thead th {
-  background: #f4f8ef;
+  background: #f3f7ff;
   font-weight: 800;
-  color: #4d5d42;
+  color: #495d80;
 }
 
 tbody tr:last-child td {
@@ -274,7 +274,7 @@ tbody tr:last-child td {
 }
 
 tbody tr:nth-child(2n) {
-  background: #fbfdf9;
+  background: #fbfdff;
 }
 
 tbody tr {
@@ -282,7 +282,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #f4f9f3;
+  background: #f3f7ff;
 }
 
 .app-shell {
@@ -308,9 +308,9 @@ tbody tr:hover {
   top: 0;
   height: 100vh;
   background:
-    radial-gradient(circle at 12% 8%, #24614d 0%, transparent 38%),
-    linear-gradient(178deg, #122f2f, #18443f 60%, #2b6458),
-    #12372a;
+    radial-gradient(circle at 14% 8%, #2b4f97 0%, transparent 40%),
+    linear-gradient(178deg, #17284f, #1c3766 58%, #27497f),
+    #1a315b;
   color: #fff;
   border-right: 1px solid #ffffff1f;
   box-shadow: inset -1px 0 0 #ffffff1c;
@@ -330,7 +330,7 @@ tbody tr:hover {
   font-size: 12px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #d8ece4;
+  color: #dbe6ff;
 }
 
 .sidebar-nav {
@@ -342,7 +342,7 @@ tbody tr:hover {
 .sidebar-nav a {
   padding: 10px 12px;
   border-radius: 12px;
-  color: #e7f7f0;
+  color: #e8efff;
   border: 1px solid transparent;
   transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
@@ -353,16 +353,16 @@ tbody tr:hover {
 }
 
 .sidebar-nav a.active {
-  color: #0f2b22;
-  background: linear-gradient(145deg, #ddf8dd, #fdf6db);
-  border-color: #e9f7ec;
+  color: #122238;
+  background: linear-gradient(145deg, #e2ecff, #fff1de);
+  border-color: #edf2ff;
   box-shadow: 0 10px 22px #00000030;
 }
 
 .sidebar-footer button {
   width: 100%;
   background: #ffffff1a;
-  color: #eef8f3;
+  color: #edf3ff;
   box-shadow: none;
 }
 
@@ -392,8 +392,8 @@ tbody tr:hover {
   border-radius: var(--radius-md);
   border: 1px solid #ffffff;
   background:
-    linear-gradient(120deg, #fff7ecf2, #f7fffae8 55%, #eef7f4e0),
-    #fffcf8;
+    linear-gradient(120deg, #f4f8fff2, #f5f8ffe8 55%, #fff3e7e0),
+    #fbfdff;
   box-shadow: var(--shadow-soft);
 }
 
@@ -408,7 +408,7 @@ tbody tr:hover {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #69736d;
+  color: #667089;
 }
 
 .app-topbar-meta {
@@ -420,10 +420,10 @@ tbody tr:hover {
 .topbar-date-chip {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #d2dfd6;
+  border: 1px solid #cedcf6;
   border-radius: 999px;
-  background: #eff8f4;
-  color: #20544e;
+  background: #eef4ff;
+  color: #244c8b;
   font-size: 12px;
   font-weight: 800;
   padding: 6px 10px;
@@ -435,7 +435,7 @@ tbody tr:hover {
 
 .page-subtitle {
   margin: -4px 0 0;
-  color: #4f5d45;
+  color: #58657d;
   font-size: 14px;
 }
 
@@ -461,8 +461,8 @@ tbody tr:hover {
   padding: 7px 12px;
   border-radius: 999px;
   font-size: 13px;
-  background: #e6f3ed;
-  color: #1a5f4b;
+  background: #e7efff;
+  color: #24488a;
   box-shadow: none;
 }
 
@@ -481,7 +481,7 @@ tbody tr:hover {
 .stat {
   border: 1px solid #ffffff;
   background:
-    linear-gradient(160deg, #ffffffee, #f8f8f0ee 58%, #f2f6ecec),
+    linear-gradient(160deg, #ffffffee, #f4f8ffef 58%, #eff5ffec),
     var(--card);
   position: relative;
   overflow: hidden;
@@ -495,13 +495,13 @@ tbody tr:hover {
   border-radius: 999px;
   right: -24px;
   top: -24px;
-  background: linear-gradient(145deg, #ffcf9f66, #ffffff22);
+  background: linear-gradient(145deg, #9ec5ff66, #ffffff22);
 }
 
 .stat span {
   font-size: 34px;
   font-weight: 800;
-  color: #0c6a63;
+  color: #2558c9;
 }
 
 .stack {
@@ -588,8 +588,8 @@ tbody tr:hover {
 
 .test-entry-bg {
   background:
-    radial-gradient(circle at 10% 20%, #355f80 0%, transparent 30%),
-    linear-gradient(130deg, #1d3557, #446f8a 55%, #f4efe4),
+    radial-gradient(circle at 10% 20%, #3863af 0%, transparent 30%),
+    linear-gradient(130deg, #1b2f57, #2f4d86 55%, #e9effb),
     var(--bg);
 }
 
@@ -670,9 +670,9 @@ tbody tr:hover {
 }
 
 .warning-overlay {
-  background: #ffeed8;
-  border: 1px solid #ffb970;
-  color: #8b3200;
+  background: #fff0df;
+  border: 1px solid #ffb37a;
+  color: #8f410d;
   padding: 10px;
   border-radius: 12px;
   margin-bottom: 10px;
@@ -701,17 +701,17 @@ tbody tr:hover {
 }
 
 .axis-line {
-  stroke: #8fa08a;
+  stroke: #91a2bf;
   stroke-width: 1.5;
 }
 
 .grid-line {
-  stroke: #e3ebd7;
+  stroke: #e2e9f6;
   stroke-width: 1;
 }
 
 .axis-text {
-  fill: #57634a;
+  fill: #586784;
   font-size: 12px;
   font-family: "Manrope", sans-serif;
 }
@@ -739,7 +739,7 @@ tbody tr:hover {
   font-size: 13px;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: #516046;
+  color: #4d5f82;
   font-weight: 800;
 }
 
@@ -748,11 +748,11 @@ tbody tr:hover {
 }
 
 .groups-table .group-row:hover {
-  background: #f6faf2;
+  background: #f5f8ff;
 }
 
 .groups-table .group-row.expanded {
-  background: #eef6e6;
+  background: #edf3ff;
 }
 
 .group-name-button {
@@ -772,13 +772,13 @@ tbody tr:hover {
 .group-name-button:hover {
   filter: none;
   transform: none;
-  color: #12372a;
+  color: #203c75;
 }
 
 .expand-indicator {
   width: 18px;
   font-size: 15px;
-  color: #487160;
+  color: #4f689b;
   text-align: center;
 }
 
@@ -789,19 +789,19 @@ tbody tr:hover {
   align-items: center;
   border-radius: 999px;
   padding: 4px 10px;
-  background: #e2f0ea;
-  color: #155845;
+  background: #e7efff;
+  color: #214f99;
   font-weight: 800;
 }
 
 .group-students-row td {
-  background: #f8fbf5;
+  background: #f8faff;
   padding-top: 4px;
   padding-bottom: 14px;
 }
 
 .group-students-panel {
-  border: 1px solid #d9e8d2;
+  border: 1px solid #d8e3f5;
   border-radius: 14px;
   background: #fff;
   padding: 10px 12px;
@@ -812,12 +812,12 @@ tbody tr:hover {
   font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #567056;
+  color: #5872a1;
   font-weight: 800;
 }
 
 .group-students-table {
-  border: 1px solid #e1ebd6;
+  border: 1px solid #dee7f7;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -829,11 +829,11 @@ tbody tr:hover {
 }
 
 .group-students-table tbody tr:nth-child(2n) {
-  background: #fcfef9;
+  background: #fbfcff;
 }
 
 .group-student-row.active {
-  background: #eef8f0;
+  background: #ebf2ff;
 }
 
 .group-student-button {
@@ -856,14 +856,14 @@ tbody tr:hover {
 }
 
 .group-student-button.active .group-student-name {
-  color: #0a7069;
+  color: #2656c5;
 }
 
 .group-student-action {
   font-size: 12px;
   font-weight: 800;
-  color: #5e755f;
-  background: #edf6ef;
+  color: #5c7196;
+  background: #edf3ff;
   border-radius: 999px;
   padding: 4px 8px;
   white-space: nowrap;
@@ -871,9 +871,9 @@ tbody tr:hover {
 
 .student-detail-panel {
   margin-top: 14px;
-  border: 1px solid #d9e8d2;
+  border: 1px solid #d8e3f6;
   border-radius: 16px;
-  background: linear-gradient(180deg, #fcfffb, #f7fbf5);
+  background: linear-gradient(180deg, #fcfdff, #f5f8ff);
   padding: 14px;
 }
 
@@ -929,8 +929,8 @@ tbody tr:hover {
   align-items: center;
   border-radius: 999px;
   padding: 6px 10px;
-  background: #e5f2ea;
-  color: #175845;
+  background: #e9f1ff;
+  color: #1e4a94;
   font-size: 12px;
   font-weight: 800;
 }
@@ -951,7 +951,7 @@ tbody tr:hover {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #5e7154;
+  color: #5e7298;
   font-weight: 800;
 }
 
@@ -970,13 +970,13 @@ tbody tr:hover {
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #5b715e;
+  color: #5b729f;
 }
 
 .subject-filter-row select {
   margin-top: 4px;
-  background: #f8fcf7;
-  border-color: #d6e3ca;
+  background: #f8fbff;
+  border-color: #d4e1f7;
 }
 
 .subject-chart-legend {
@@ -994,8 +994,8 @@ tbody tr:hover {
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-  color: #2f4e43;
-  background: #eef6f1;
+  color: #365691;
+  background: #edf3ff;
 }
 
 .subject-line-dot {
@@ -1007,7 +1007,7 @@ tbody tr:hover {
 
 .chart-tooltip-panel {
   background: #ffffff;
-  border: 1px solid #d7e4cf;
+  border: 1px solid #d8e3f6;
   border-radius: 10px;
   box-shadow: 0 10px 22px #0f2a1517;
   padding: 8px 10px;
@@ -1018,7 +1018,7 @@ tbody tr:hover {
   margin: 0 0 6px;
   font-size: 12px;
   font-weight: 800;
-  color: #335142;
+  color: #355590;
 }
 
 .chart-tooltip-row {
@@ -1027,7 +1027,7 @@ tbody tr:hover {
   justify-content: space-between;
   gap: 8px;
   font-size: 12px;
-  color: #2f4e43;
+  color: #365691;
 }
 
 .chart-tooltip-dot {
@@ -1040,9 +1040,9 @@ tbody tr:hover {
 .test-progress-wrap {
   margin: 10px 0 14px;
   padding: 10px 12px;
-  border: 1px solid #dbe2d8;
+  border: 1px solid #d6e3f7;
   border-radius: 12px;
-  background: #f9fcf8;
+  background: #f8fbff;
 }
 
 .test-progress-meta {
@@ -1050,7 +1050,7 @@ tbody tr:hover {
   justify-content: space-between;
   gap: 8px;
   font-size: 12px;
-  color: #476255;
+  color: #4d6591;
   font-weight: 800;
   margin-bottom: 6px;
 }
@@ -1059,7 +1059,7 @@ tbody tr:hover {
   width: 100%;
   height: 8px;
   border-radius: 999px;
-  background: #dce6da;
+  background: #d8e4fa;
   overflow: hidden;
 }
 
@@ -1067,7 +1067,7 @@ tbody tr:hover {
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #0f8b8d, #f4a259);
+  background: linear-gradient(90deg, #2563eb, #f97316);
   transition: width 0.22s ease;
 }
 
@@ -1093,7 +1093,7 @@ tbody tr:hover {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px dashed #e1ead8;
+  border-bottom: 1px dashed #dbe5f6;
   padding-bottom: 8px;
 }
 
@@ -1104,13 +1104,13 @@ tbody tr:hover {
 
 .group-student-name {
   font-weight: 700;
-  color: #1d2b18;
+  color: #1d3156;
 }
 
 .group-student-id {
   font-size: 12px;
-  color: #406454;
-  background: #edf7f0;
+  color: #3f5d95;
+  background: #ebf2ff;
   border-radius: 999px;
   padding: 4px 9px;
   font-weight: 700;
@@ -1173,14 +1173,14 @@ tbody tr:hover {
 }
 
 .test-composer-card {
-  border: 1px solid #d9e5ce;
-  box-shadow: 0 14px 38px #0b24121f;
+  border: 1px solid #d7e2f6;
+  box-shadow: 0 14px 38px #0f2d6a1f;
 }
 
 .delete-confirm-backdrop {
   position: fixed;
   inset: 0;
-  background: #0f1c142e;
+  background: #0f1d352e;
   backdrop-filter: blur(2px);
   display: flex;
   justify-content: center;
@@ -1191,8 +1191,8 @@ tbody tr:hover {
 
 .delete-confirm-panel {
   width: min(620px, 100%);
-  border: 1px solid #d7e3cc;
-  box-shadow: 0 18px 42px #071d102e;
+  border: 1px solid #d6e2f8;
+  box-shadow: 0 18px 42px #0d26592e;
   animation: drop-from-top 0.24s ease-out;
 }
 
@@ -1200,9 +1200,9 @@ tbody tr:hover {
   margin-top: -4px;
   margin-bottom: 10px;
   font-weight: 800;
-  color: #213922;
-  background: #edf6e7;
-  border: 1px dashed #b8ccaf;
+  color: #233f70;
+  background: #edf3ff;
+  border: 1px dashed #bbcbec;
   border-radius: 10px;
   padding: 8px 10px;
 }
@@ -1238,8 +1238,8 @@ tbody tr:hover {
 .group-picker-card {
   max-height: 210px;
   overflow: auto;
-  border-color: #e0ead2;
-  background: #fbfdf8;
+  border-color: #d8e4f8;
+  background: #fafcff;
 }
 
 .group-checkbox {
@@ -1275,7 +1275,7 @@ tbody tr:hover {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px;
-  background: #fafbf8;
+  background: #fbfcff;
   display: grid;
   gap: 10px;
   align-content: start;
