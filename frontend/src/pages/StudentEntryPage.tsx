@@ -50,8 +50,14 @@ export default function StudentEntryPage() {
   return (
     <div className="center-screen test-entry-bg">
       <div className="card entry-card">
-        <h1>{entry.title}</h1>
-        <p>{entry.description || "No description provided."}</p>
+        <div className="entry-header">
+          <h1>{entry.title}</h1>
+          <p>{entry.description || "No description provided."}</p>
+        </div>
+        <div className="entry-chip-row">
+          <span className="topbar-date-chip">Timed assessment</span>
+          <span className="topbar-date-chip">Fullscreen monitored</span>
+        </div>
         {assignedGroups.length > 0 && (
           <>
             <p><strong>Assigned Groups:</strong> {assignedGroups.join(", ")}</p>
@@ -75,7 +81,7 @@ export default function StudentEntryPage() {
               />
             </label>
             {error && <div className="error">{error}</div>}
-            <button type="submit">Start Test</button>
+            <button type="submit" className="btn-primary">Start Test</button>
           </form>
         )}
       </div>

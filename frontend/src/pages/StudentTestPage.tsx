@@ -290,6 +290,9 @@ export default function StudentTestPage() {
 
   if (!session || !currentQuestion) return <div className="center-screen">Loading session...</div>;
 
+  const answeredCount = session.questions.filter((question: any) => (answers[question.id] || "").trim().length > 0).length;
+  const progressPercent = Math.round(((index + 1) / session.questions.length) * 100);
+
   const onOverlayTouchStart = () => {
     const now = Date.now();
     if (now - lastOverlayTapRef.current < 350) {
@@ -301,37 +304,14 @@ export default function StudentTestPage() {
   };
 
   return (
-    <div className="test-shell" style={{ position: "relative" }}>
+    <div className="test-shell test-shell-modern">
       {isFullscreenLost && (
         <div
           onDoubleClick={() => requestFullscreenFromOverlay().catch(() => undefined)}
           onTouchStart={onOverlayTouchStart}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.95)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-            pointerEvents: "auto",
-          }}
+          className="fullscreen-blocker"
         >
-          <div
-            style={{
-              textAlign: "center",
-              color: "white",
-              fontSize: "24px",
-              fontWeight: "bold",
-              padding: "40px",
-              backgroundColor: "rgba(200, 0, 0, 0.8)",
-              borderRadius: "10px",
-              maxWidth: "600px",
-            }}
-          >
+          <div className="fullscreen-blocker-content">
             <h1>⚠️ FULLSCREEN VIOLATION</h1>
             <p>The test must be taken in fullscreen mode.</p>
             <p>You have {Math.max(0, WARNING_LIMIT - violations)} attempt{Math.max(0, WARNING_LIMIT - violations) === 1 ? "" : "s"} remaining.</p>
@@ -339,7 +319,7 @@ export default function StudentTestPage() {
           </div>
         </div>
       )}
-      <div style={{ pointerEvents: isFullscreenLost ? "none" : "auto", opacity: isFullscreenLost ? 0.5 : 1 }}>
+      <div className={isFullscreenLost ? "test-shell-content dimmed" : "test-shell-content"}>
       <header>
         <h2>{session.title}</h2>
         <div className={secondsLeft < 300 ? "timer danger" : "timer"}>
@@ -348,6 +328,16 @@ export default function StudentTestPage() {
         <div>Warnings: {violations} / {WARNING_LIMIT}</div>
         <div>Attempts left: {Math.max(0, WARNING_LIMIT - violations)} / {WARNING_LIMIT}</div>
       </header>
+
+      <div className="test-progress-wrap" aria-label="Test progress">
+        <div className="test-progress-meta">
+          <span>Progress: {progressPercent}%</span>
+          <span>Answered: {answeredCount} / {session.questions.length}</span>
+        </div>
+        <div className="test-progress-track">
+          <span className="test-progress-fill" style={{ width: `${progressPercent}%` }} />
+        </div>
+      </div>
 
       {warning && <div className="warning-overlay">{warning}</div>}
 

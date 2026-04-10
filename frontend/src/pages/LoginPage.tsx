@@ -24,11 +24,17 @@ export default function LoginPage() {
   return (
     <div className="center-screen">
       <form className="card login-card" onSubmit={onSubmit}>
-        <h1>Student Performance Tracker</h1>
-        <p>Teacher sign-in for dashboard management</p>
+        <div className="login-header">
+          <h1>Student Performance Tracker</h1>
+          <p>Teacher sign-in for dashboard management</p>
+        </div>
         <p className="muted-text" style={{ marginTop: 0 }}>
           Use the local teacher account configured in backend/.env.
         </p>
+        <div className="login-meta-row">
+          <span className="topbar-date-chip">Secure teacher panel</span>
+          <span className="topbar-date-chip">Real-time analytics</span>
+        </div>
         <label>
           Username
           <input value={username} onChange={(e) => setUsername(e.target.value)} />

@@ -404,7 +404,10 @@ export default function GroupsPage() {
 
   return (
     <div>
-      <h1>Groups</h1>
+      <div className="page-header">
+        <h1>Groups</h1>
+        <p className="page-subtitle">Organize class rosters, monitor students, and manage group assignments.</p>
+      </div>
       {error && <div className="error">{error}</div>}
 
       <section className="card">
